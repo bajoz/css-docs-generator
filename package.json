@@ -1,0 +1,52 @@
+{
+  "name": "css-docs-generator",
+  "version": "1.0.0",
+  "description": "Generate docs from CSS comments.",
+  "main": "lib/index.min.js",
+  "scripts": {
+    "build": "webpack --env build",
+    "dev": "webpack --progress --colors --watch --env dev",
+    "test": "jest",
+    "lint": "eslint src/",
+    "format": "prettier-eslint --print-width 120 --write \"src/**/*.js\""
+  },
+  "devDependencies": {
+    "babel-cli": "6.24.1",
+    "babel-core": "6.24.1",
+    "babel-eslint": "7.2.3",
+    "babel-jest": "^21.2.0",
+    "babel-loader": "7.0.0",
+    "babel-plugin-add-module-exports": "0.2.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "clean-webpack-plugin": "^0.1.17",
+    "comment-tag-extractor": "^1.0.1",
+    "eslint": "3.19.0",
+    "eslint-loader": "1.7.1",
+    "jest": "^21.2.1",
+    "prettier-eslint-cli": "^4.4.0",
+    "webpack": "3.1.0",
+    "yargs": "7.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bajoz/css-docs-generator.git"
+  },
+  "files": [
+    "lib/",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "css",
+    "docs",
+    "json"
+  ],
+  "author": "Endrit Bajo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bajoz/css-docs-generator.git/issues"
+  },
+  "homepage": "https://github.com/bajoz/css-docs-generator.git",
+  "dependencies": {}
+}
