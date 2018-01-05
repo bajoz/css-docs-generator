@@ -1,6 +1,6 @@
 {
   "name": "css-docs-generator",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Generate docs from CSS comments.",
   "main": "lib/index.min.js",
   "scripts": {
