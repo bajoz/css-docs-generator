@@ -8,7 +8,8 @@
     "dev": "webpack --progress --colors --watch --env dev",
     "test": "jest",
     "lint": "eslint src/",
-    "format": "prettier-eslint --print-width 120 --write \"src/**/*.js\""
+    "format": "prettier-eslint --print-width 120 --write \"src/**/*.js\"",
+    "prepare": "yarn build"
   },
   "devDependencies": {
     "babel-cli": "6.24.1",
