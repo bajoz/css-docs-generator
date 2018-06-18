@@ -1,4 +1,4 @@
-import { generateDocs } from '../index';
+import { extract, organise } from '../index';
 
 describe('index', () => {
   const noTags = `
@@ -17,7 +17,7 @@ describe('index', () => {
     }
   `;
 
-  describe('single comment', () => {
+  describe('extract()', () => {
     it('returns empty array if the section name is not defined', () => {
       const code = `
         /**
@@ -33,10 +33,10 @@ describe('index', () => {
            background-color: blue;
          }
       `;
-      expect(generateDocs(code)).toEqual([]);
+      expect(extract(code)).toEqual([]);
     });
 
-    it('returns the section data', () => {
+    it('returns the extracted comment', () => {
       const code = `
         /**
          * @name Button
@@ -69,14 +69,14 @@ describe('index', () => {
             }
           ],
           markup: '<div class="{{modifier}}">Button</div>',
-          subsections: []
+          section: null
         }
       ];
 
-      expect(generateDocs(code)).toEqual(expected);
+      expect(extract(code)).toEqual(expected);
     });
 
-    it('returns the section data without description', () => {
+    it('returns the comment without description', () => {
       const code = `
         /**
          * @name Button
@@ -108,14 +108,14 @@ describe('index', () => {
             }
           ],
           markup: '<div class="{{modifier}}">Button</div>',
-          subsections: []
+          section: null
         }
       ];
 
-      expect(generateDocs(code)).toEqual(expected);
+      expect(extract(code)).toEqual(expected);
     });
 
-    it('returns the section data without class descriptions', () => {
+    it('returns the comment without class descriptions', () => {
       const code = `
         /**
          * @name Button
@@ -148,14 +148,14 @@ describe('index', () => {
             }
           ],
           markup: '<div class="{{modifier}}">Button</div>',
-          subsections: []
+          section: null
         }
       ];
 
-      expect(generateDocs(code)).toEqual(expected);
+      expect(extract(code)).toEqual(expected);
     });
 
-    it('returns the section data without classes', () => {
+    it('returns the comment without classes', () => {
       const code = `
         /**
          * @name Button
@@ -174,14 +174,14 @@ describe('index', () => {
           description: 'Button component.',
           classes: [],
           markup: '<div class="{{modifier}}">Button</div>',
-          subsections: []
+          section: null
         }
       ];
 
-      expect(generateDocs(code)).toEqual(expected);
+      expect(extract(code)).toEqual(expected);
     });
 
-    it('returns the section data without markup', () => {
+    it('returns the comment without markup', () => {
       const code = `
         /**
          * @name Button
@@ -211,34 +211,16 @@ describe('index', () => {
             }
           ],
           markup: null,
-          subsections: []
+          section: null
         }
       ];
 
-      expect(generateDocs(code)).toEqual(expected);
-    });
-
-    it('throws when the section does not exist', () => {
-      const code = `
-        /**
-         * @name Button
-         *
-         * @class .btn Button class.
-         * @class .btn--primary Primary button class.
-         *
-         * @markup
-         * <div class="{{modifier}}">Button</div>
-         *
-         * @section Not a valid section.
-         */
-      `;
-
-      expect(() => generateDocs(code)).toThrowError('Section "Not a valid section." does not exist');
+      expect(extract(code)).toEqual(expected);
     });
   });
 
-  describe('multiple comments', () => {
-    it('builds the section hierarchy tree', () => {
+  describe('organise()', () => {
+    it('builds the subsections', () => {
       const code = `
        /**
        * @name Root section.
@@ -265,79 +247,71 @@ describe('index', () => {
        * @name Another root section.
        */
       `;
-      const expected = [
-        {
-          name: 'Root section.',
-          description: null,
-          classes: [],
-          markup: null,
-          subsections: [
-            {
-              name: 'Foo',
-              description: null,
-              classes: [],
-              markup: null,
-              subsections: [
-                {
-                  name: 'Bar',
-                  description: 'Bar component.',
-                  classes: [
-                    {
-                      name: '.bar',
-                      description: 'Bar.',
-                      markup: '<div class="bar">Bar</div>'
-                    }
-                  ],
-                  markup: '<div class="{{modifier}}">Bar</div>',
-                  subsections: []
-                }
-              ]
-            }
-          ]
-        },
-        {
-          name: 'Another root section.',
-          description: null,
-          classes: [],
-          markup: null,
-          subsections: []
-        }
-      ];
-      expect(generateDocs(code)).toEqual(expected);
+      const expected = {
+        roots: ['Root section.', 'Another root section.'],
+        sections: [
+          {
+            name: 'Root section.',
+            description: null,
+            classes: [],
+            markup: null,
+            subsections: ['Foo']
+          },
+          {
+            name: 'Foo',
+            description: null,
+            classes: [],
+            markup: null,
+            subsections: ['Bar']
+          },
+          {
+            name: 'Bar',
+            description: 'Bar component.',
+            classes: [
+              {
+                name: '.bar',
+                description: 'Bar.',
+                markup: '<div class="bar">Bar</div>'
+              }
+            ],
+            markup: '<div class="{{modifier}}">Bar</div>',
+            subsections: []
+          },
+          {
+            name: 'Another root section.',
+            description: null,
+            classes: [],
+            markup: null,
+            subsections: []
+          }
+        ]
+      };
+      expect(organise(extract(code))).toEqual(expected);
     });
-  });
 
-  it('returns an empty array when no docs', () => {
-    expect(generateDocs(noTags)).toEqual([]);
-  });
+    it('returns an empty array when no docs', () => {
+      expect(organise(extract(noTags))).toEqual({
+        roots: [],
+        sections: []
+      });
+    });
 
-  it('returns the root sections', () => {
-    const code = `
-      /**
-       * @name Some section.
-       */
+    it('throws when the section does not exist', () => {
+      const code = `
+        /**
+         * @name Button
+         *
+         * @class .btn Button class.
+         * @class .btn--primary Primary button class.
+         *
+         * @markup
+         * <div class="{{modifier}}">Button</div>
+         *
+         * @section Not a valid section.
+         */
+      `;
 
-      /**
-       * @name Other section.
-       */
-    `;
-    const expected = [
-      {
-        name: 'Some section.',
-        description: null,
-        classes: [],
-        markup: null,
-        subsections: []
-      },
-      {
-        name: 'Other section.',
-        description: null,
-        classes: [],
-        markup: null,
-        subsections: []
-      }
-    ];
-
-    expect(generateDocs(code)).toEqual(expected);
+      expect(() => organise(extract(code))).toThrowError('Section "Not a valid section." does not exist');
+    });
   });
 });

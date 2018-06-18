@@ -1,4 +1,4 @@
-import { extract, parse } from 'comment-tag-extractor';
+import { extract as extractComments, parse } from 'comment-tag-extractor';
 
 const isArrayEmpty = array => !Array.isArray(array) || array.length === 0;
 
@@ -43,12 +43,17 @@ const generateComment = comment => {
     description: first(comment.description),
     classes: generateClasses(comment['class'], markup),
     section: first(comment.section),
-    subsections: [],
     markup
   };
 };
 
-const buildSectionTree = comments => {
+export const extract = code => {
+  const extractedComments = parse(extractComments(code));
+  return extractedComments.map(generateComment).filter(comment => comment);
+}
+
+export const organise = flatComments => {
+  const comments = flatComments.map(comment => Object.assign({}, comment, { subsections: [] }))
   // build hashtable where keys are all section names
   // { [section name]: [section obj] }
   const dict = comments.reduce((acc, comment) => {
@@ -64,7 +69,13 @@ const buildSectionTree = comments => {
     if (!dict[comment.section.toLowerCase()]) {
       throw new Error(`Section "${comment.section}" does not exist`);
     }
-    dict[comment.section.toLowerCase()].subsections.push(comment);
+    const entry = dict[comment.section.toLowerCase()]
+
+    if (!entry.subsections) {
+      entry['subsections'] = []
+    }
+
+    entry.subsections.push(comment.name);
   });
 
   // clear the section field
@@ -72,12 +83,8 @@ const buildSectionTree = comments => {
     delete comment.section;
   });
 
-  return roots;
-};
-
-export const generateDocs = code => {
-  const extractedComments = parse(extract(code));
-  const comments = extractedComments.map(generateComment).filter(comment => comment);
-
-  return buildSectionTree(comments);
+  return {
+    roots: roots.map(section => section.name),
+    sections: Object.values(dict)
+  };
 };

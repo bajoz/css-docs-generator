@@ -18,7 +18,7 @@ $ yarn add css-docs-generator
 ## Usage
 
 ```javascript
-import {generateDocs} from 'css-docs-generator';
+import {extract, organise} from 'css-docs-generator';
 
 const code = `
   /**
@@ -50,46 +50,47 @@ const code = `
    */
 `;
 
-const docs = generateDocs(code);
+const docs = organise(extract(code));
 console.log(docs);
 
 // Will output:
-// [
-//   {
-//     name: 'Root section.',
-//     description: null,
-//     classes: [],
-//     markup: null,
-//     subsections: [
-//       {
-//         name: 'Foo',
-//         description: null,
-//         classes: [],
-//         markup: null,
-//         subsections: [
-//           {
-//             name: 'Bar',
-//             description: 'Bar component.',
-//             classes: [
-//               {
-//                 name: '.bar',
-//                 description: 'Bar.',
-//                 markup: '<div class="bar">Bar</div>'
-//               }
-//             ],
-//             markup: '<div class="{{modifier}}">Bar</div>',
-//             subsections: []
-//           }
-//         ]
-//       }
-//     ]
-//   },
-//   {
-//     name: 'Another root section.',
-//     description: null,
-//     classes: [],
-//     markup: null,
-//     subsections: []
-//   }
-// ];
+// {
+//   roots: ['Root section.', 'Another root section.'],
+//   sections: [
+//     {
+//       name: 'Root section.',
+//       description: null,
+//       classes: [],
+//       markup: null,
+//       subsections: ['Foo']
+//     },
+//     {
+//       name: 'Foo',
+//       description: null,
+//       classes: [],
+//       markup: null,
+//       subsections: ['Bar']
+//     },
+//     {
+//       name: 'Bar',
+//       description: 'Bar component.',
+//       classes: [
+//         {
+//           name: '.bar',
+//           description: 'Bar.',
+//           markup: '<div class="bar">Bar</div>'
+//         }
+//       ],
+//       markup: '<div class="{{modifier}}">Bar</div>',
+//       subsections: []
+//     },
+//     {
+//       name: 'Another root section.',
+//       description: null,
+//       classes: [],
+//       markup: null,
+//       subsections: []
+//     }
+//   ]
+// }
 ```
